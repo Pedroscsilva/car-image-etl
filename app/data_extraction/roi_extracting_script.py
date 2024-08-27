@@ -31,7 +31,7 @@ def make_multiple_roi(df):
         make_multiple_roi(df)
 
     else:
-        df.to_csv(f'./roi{dt.today()}.csv')
+        df.to_csv(f'app/data_extraction/roi{dt.today()}.csv')
         print('ROI saved as .csv with success!')
 
 make_multiple_roi(roi_df)
