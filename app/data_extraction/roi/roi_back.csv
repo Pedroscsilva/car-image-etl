@@ -1,5 +1,5 @@
 roi_name,x,y,w,h
 back_window,1722,667,541,134
-cofre,1711,801,575,224
-left_back_panneau,1564,729,145,343
-right_back_panneau,2284,677,136,408
+tailgate,1711,801,575,224
+left_back_panel,1564,729,145,343
+right_back_panel,2284,677,136,408
