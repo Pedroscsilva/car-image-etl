@@ -24,7 +24,7 @@ complete_df['arrived_at'] = pd.to_datetime(complete_df['arrived_at'], dayfirst=T
 
 data = complete_df.sort_values(by='arrived_at')
 
-def create_flaw_diagram(filtered_df):
+def create_flaw_diagram(filtered_df, filename):
     img_path = '../data_visualization/crop_diagram_data.png'
     annotation_path = '../data_visualization/crop_diagram_data.json'
     img = Image.open(img_path)
@@ -47,7 +47,7 @@ def create_flaw_diagram(filtered_df):
         centroid_y = sum(y_coords) / len(polygon)
         return (centroid_x, centroid_y)
 
-    font = ImageFont.load_default()
+    font = ImageFont.load_default(size=20)
 
     for shape in annotations['shapes']:
         part_name = shape['label']
@@ -59,16 +59,36 @@ def create_flaw_diagram(filtered_df):
             draw.text(centroid, str(flaw_data[part_name]), fill='black', font=font)
 
     img_array = np.array(img)
-    fig, ax = plt.subplots()
-    ax.imshow(img_array)
-    ax.axis('off')
+    # fig, ax = plt.subplots()
+    fig = px.imshow(img_array, title='Amount of Flaws per Car Part')
+    # fig.update_xaxes(showticklabels=False)
+    # fig.update_yaxes(showticklabels=False)
 
-    # Convert the plot to a PNG image
-    buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches='tight')
-    buf.seek(0)
-    encoded_img = base64.b64encode(buf.getvalue()).decode()
-    return f"data:image/png;base64,{encoded_img}"
+    # Hide the axes and the tooltips
+    fig.update_layout(
+        title='Amount of Flaws per Car Part',
+        title_y=0.91,  # Adjust vertical positioning of the title
+        margin=dict(l=0, r=0, t=50, b=0),  # Set margins to zero (except for top margin for title)
+        xaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            showticklabels=False,
+            scaleanchor='y',  # Ensure aspect ratio is preserved
+            scaleratio=1  # Set scale ratio to maintain image aspect
+        ),
+        yaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            showticklabels=False,
+        ),
+        plot_bgcolor='white',  # Set background color
+        paper_bgcolor='white',  # Set paper background color
+    )
+
+    return dcc.Graph(
+            figure=fig,
+            config={'displayModeBar': True} # Always display the modebar
+        )
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -85,23 +105,6 @@ app.layout = dbc.Container([
                         ],
                         value=[],
                         id="color-checkboxes",
-                        inline=True
-                    )
-                ],
-                toggle_style={"width": "100%"}
-            ),
-        ]),
-        dbc.Col([
-            dbc.DropdownMenu(
-                label="Week Filters",
-                children=[
-                    dbc.Checklist(
-                        options=[
-                            {"label": str(week), "value": week}
-                            for week in sorted(data['week'].unique())
-                        ],
-                        value=[],
-                        id="week-checkboxes",
                         inline=True
                     )
                 ],
@@ -136,12 +139,11 @@ app.layout = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col([
-            dcc.Graph(id='flaws-per-week'),
             dcc.Graph(id='items-by-day'),
             dcc.Graph(id='flaws-by-color'),
         ]),
         dbc.Col([
-            html.Img(id='flaw-diagram'),
+            html.Div(id='flaw-diagram'),
             dcc.Graph(id='flaws-by-model'),
             dcc.Graph(id='flaws-by-cause'),
             dcc.Graph(id='flaws-by-type'),
@@ -151,30 +153,25 @@ app.layout = dbc.Container([
 
 @app.callback(
     [
-        Output("flaws-per-week", "figure"),
         Output("items-by-day", "figure"),
         Output("flaws-by-color", "figure"),
         Output("flaws-by-model", "figure"),
         Output("flaws-by-cause", "figure"),
         Output("flaws-by-type", "figure"),
-        Output("flaw-diagram", 'src')
+        Output("flaw-diagram", 'children')
     ],
     [
         Input("color-checkboxes", "value"),
-        Input("week-checkboxes", "value"),
         Input("model-checkboxes", "value"),
         Input("date-picker", "start_date"),
         Input("date-picker", "end_date")
     ]
 )
-def update_plots(selected_colors, selected_weeks, selected_models, start_date, end_date):
+def update_plots(selected_colors, selected_models, start_date, end_date):
     filtered_df = data
 
     if selected_colors:
         filtered_df = filtered_df[filtered_df['color'].isin(selected_colors)]
-
-    if selected_weeks:
-        filtered_df = filtered_df[filtered_df['week'].isin(selected_weeks)]
 
     if selected_models:
         filtered_df = filtered_df[filtered_df['model'].isin(selected_models)]
@@ -183,15 +180,6 @@ def update_plots(selected_colors, selected_weeks, selected_models, start_date, e
         filtered_df = filtered_df[
             (filtered_df['arrived_at'] >= start_date) & (filtered_df['arrived_at'] <= end_date)
         ]
-
-    # Plot: Amount of flaws per week (horizontal bar chart)
-    flaws_per_week = px.bar(
-        filtered_df.groupby('week').size().reset_index(name='flaws'),
-        x='flaws',
-        y='week',
-        orientation='h',
-        title='Amount of Flaws per Week'
-    )
 
     # Plot: Items by day and amount of flaws in the same day (line chart)
     items_by_day = px.line(
@@ -237,9 +225,9 @@ def update_plots(selected_colors, selected_weeks, selected_models, start_date, e
         title='Flaws by Type'
     )
 
-    diagram_chart = create_flaw_diagram(filtered_df)
+    diagram_chart = create_flaw_diagram(filtered_df, 'lala')
 
-    return flaws_per_week, items_by_day, flaws_by_color, flaws_by_model, flaws_by_cause, flaws_by_type, diagram_chart
+    return items_by_day, flaws_by_color, flaws_by_model, flaws_by_cause, flaws_by_type, diagram_chart
 
 if __name__ == "__main__":
     app.run_server(debug=True)
