@@ -3,9 +3,6 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import io
@@ -59,42 +56,38 @@ def create_flaw_diagram(filtered_df, filename):
             draw.text(centroid, str(flaw_data[part_name]), fill='black', font=font)
 
     img_array = np.array(img)
-    # fig, ax = plt.subplots()
     fig = px.imshow(img_array, title='Amount of Flaws per Car Part')
-    # fig.update_xaxes(showticklabels=False)
-    # fig.update_yaxes(showticklabels=False)
 
-    # Hide the axes and the tooltips
     fig.update_layout(
         title='Amount of Flaws per Car Part',
-        title_y=0.91,  # Adjust vertical positioning of the title
-        margin=dict(l=0, r=0, t=50, b=0),  # Set margins to zero (except for top margin for title)
+        title_y=0.91,
+        margin=dict(l=0, r=0, t=50, b=0),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
             showticklabels=False,
-            scaleanchor='y',  # Ensure aspect ratio is preserved
-            scaleratio=1  # Set scale ratio to maintain image aspect
+            scaleanchor='y',
+            scaleratio=1
         ),
         yaxis=dict(
             showgrid=False,
             zeroline=False,
             showticklabels=False,
         ),
-        plot_bgcolor='white',  # Set background color
-        paper_bgcolor='white',  # Set paper background color
+        plot_bgcolor='white',
+        paper_bgcolor='white',
     )
 
     return dcc.Graph(
             figure=fig,
-            config={'displayModeBar': True} # Always display the modebar
+            config={'displayModeBar': True}
         )
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
+    dbc.Col([
+        dbc.Row([
             dbc.DropdownMenu(
                 label="Color Filters",
                 children=[
@@ -111,7 +104,7 @@ app.layout = dbc.Container([
                 toggle_style={"width": "100%"}
             ),
         ]),
-        dbc.Col([
+        dbc.Row([
             dbc.DropdownMenu(
                 label="Model Filters",
                 children=[
@@ -128,7 +121,7 @@ app.layout = dbc.Container([
                 toggle_style={"width": "100%"}
             ),
         ]),
-        dbc.Col([
+        dbc.Row([
             dcc.DatePickerRange(
                 id='date-picker',
                 start_date=data['arrived_at'].min(),
@@ -139,13 +132,11 @@ app.layout = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col([
-            dcc.Graph(id='items-by-day'),
+            dcc.Graph(id='flaws-by-cause'),
             dcc.Graph(id='flaws-by-color'),
         ]),
         dbc.Col([
             html.Div(id='flaw-diagram'),
-            dcc.Graph(id='flaws-by-model'),
-            dcc.Graph(id='flaws-by-cause'),
             dcc.Graph(id='flaws-by-type'),
         ]),
     ])
@@ -153,9 +144,7 @@ app.layout = dbc.Container([
 
 @app.callback(
     [
-        Output("items-by-day", "figure"),
         Output("flaws-by-color", "figure"),
-        Output("flaws-by-model", "figure"),
         Output("flaws-by-cause", "figure"),
         Output("flaws-by-type", "figure"),
         Output("flaw-diagram", 'children')
@@ -181,14 +170,6 @@ def update_plots(selected_colors, selected_models, start_date, end_date):
             (filtered_df['arrived_at'] >= start_date) & (filtered_df['arrived_at'] <= end_date)
         ]
 
-    # Plot: Items by day and amount of flaws in the same day (line chart)
-    items_by_day = px.line(
-        filtered_df.groupby('arrived_at').size().reset_index(name='flaws'),
-        x='arrived_at',
-        y='flaws',
-        title='Items by Day and Amount of Flaws'
-    )
-
     # Plot: Flaws by color (horizontal bar chart)
     flaws_by_color = px.bar(
         filtered_df.groupby('color').size().reset_index(name='flaws'),
@@ -196,15 +177,6 @@ def update_plots(selected_colors, selected_models, start_date, end_date):
         y='color',
         orientation='h',
         title='Flaws by Color'
-    )
-
-    # Plot: Flaws by model (horizontal bar chart)
-    flaws_by_model = px.bar(
-        filtered_df.groupby('model').size().reset_index(name='flaws'),
-        x='flaws',
-        y='model',
-        orientation='h',
-        title='Flaws by Model'
     )
 
     # Plot: Flaws by cause (horizontal bar chart)
@@ -227,7 +199,7 @@ def update_plots(selected_colors, selected_models, start_date, end_date):
 
     diagram_chart = create_flaw_diagram(filtered_df, 'lala')
 
-    return items_by_day, flaws_by_color, flaws_by_model, flaws_by_cause, flaws_by_type, diagram_chart
+    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
 
 if __name__ == "__main__":
     app.run_server(debug=True)
