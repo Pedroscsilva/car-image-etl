@@ -86,61 +86,61 @@ def create_flaw_diagram(filtered_df, filename):
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
-    dbc.Col([
-        dbc.Row([
-            dbc.DropdownMenu(
-                label="Color Filters",
-                children=[
-                    dbc.Checklist(
-                        options=[
-                            {"label": color, "value": color}
-                            for color in data['color'].unique()
-                        ],
-                        value=[],
-                        id="color-checkboxes",
-                        inline=True
-                    )
-                ],
-                toggle_style={"width": "100%"}
-            ),
-        ]),
-        dbc.Row([
-            dbc.DropdownMenu(
-                label="Model Filters",
-                children=[
-                    dbc.Checklist(
-                        options=[
-                            {"label": model, "value": model}
-                            for model in data['model'].unique()
-                        ],
-                        value=[],
-                        id="model-checkboxes",
-                        inline=True
-                    )
-                ],
-                toggle_style={"width": "100%"}
-            ),
-        ]),
-        dbc.Row([
-            dcc.DatePickerRange(
-                id='date-picker',
-                start_date=data['arrived_at'].min(),
-                end_date=data['arrived_at'].max(),
-                display_format='YYYY-MM-DD'
-            ),
-        ])
-    ]),
     dbc.Row([
+        dbc.Col([
+            dbc.Row([
+                dbc.DropdownMenu(
+                    label="Color Filters",
+                    children=[
+                        dbc.Checklist(
+                            options=[
+                                {"label": color, "value": color}
+                                for color in data['color'].unique()
+                            ],
+                            value=[],
+                            id="color-checkboxes",
+                            inline=True
+                        )
+                    ],
+                    toggle_style={"width": "100%"}
+                ),
+            ]),
+            dbc.Row([
+                dbc.DropdownMenu(
+                    label="Model Filters",
+                    children=[
+                        dbc.Checklist(
+                            options=[
+                                {"label": model, "value": model}
+                                for model in data['model'].unique()
+                            ],
+                            value=[],
+                            id="model-checkboxes",
+                            inline=True
+                        )
+                    ],
+                    toggle_style={"width": "100%"}
+                ),
+            ], className='pt-4'),
+            dbc.Row([
+                dcc.DatePickerRange(
+                    id='date-picker',
+                    start_date=data['arrived_at'].min(),
+                    end_date=data['arrived_at'].max(),
+                    display_format='YYYY-MM-DD'
+                ),
+            ], className='pt-4')
+        ], width=2, className='pt-4'),
         dbc.Col([
             dcc.Graph(id='flaws-by-cause'),
             dcc.Graph(id='flaws-by-color'),
-        ]),
+        ], width=5),
         dbc.Col([
             html.Div(id='flaw-diagram'),
             dcc.Graph(id='flaws-by-type'),
-        ]),
+        ], width=5),
     ])
-])
+], className='mx-0 my-0', fluid=True)
 
 @app.callback(
     [
