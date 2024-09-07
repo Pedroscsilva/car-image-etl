@@ -260,8 +260,9 @@ def update_plots(selected_colors, selected_models, start_date, end_date, click_c
     if click_diagram and clean_filter == 0:
         x = click_diagram['points'][0]['x']
         y = click_diagram['points'][0]['y']
-        label = [find_polygon(x, y)]
-        filtered_df = filtered_df[filtered_df['roi'].isin(label)]
+        label = find_polygon(x, y)
+        if label:
+            filtered_df = filtered_df[filtered_df['roi'].isin([label])]
     
     n_clicks = 0
 
