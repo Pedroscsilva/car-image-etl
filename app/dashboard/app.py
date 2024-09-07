@@ -89,6 +89,9 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dbc.Row([
+                html.H1('Flaws Dashboard')
+            ]),
+            dbc.Row([
                 dbc.DropdownMenu(
                     label="Color Filters",
                     children=[
@@ -104,7 +107,7 @@ app.layout = dbc.Container([
                     ],
                     toggle_style={"width": "100%"}
                 ),
-            ]),
+            ], className='pt-4'),
             dbc.Row([
                 dbc.DropdownMenu(
                     label="Model Filters",
@@ -129,6 +132,11 @@ app.layout = dbc.Container([
                     end_date=data['arrived_at'].max(),
                     display_format='YYYY-MM-DD'
                 ),
+            ], className='pt-4'),
+            dbc.Row([
+                dbc.Button(
+                    'Clean Filters', id='clean-filter-btn', n_clicks=0
+                )
             ], className='pt-4')
         ], width=2, className='pt-4'),
         dbc.Col([
@@ -147,28 +155,47 @@ app.layout = dbc.Container([
         Output("flaws-by-color", "figure"),
         Output("flaws-by-cause", "figure"),
         Output("flaws-by-type", "figure"),
-        Output("flaw-diagram", 'children')
+        Output("flaw-diagram", 'children'),
+        Output('clean-filter-btn', 'n_clicks')
     ],
     [
         Input("color-checkboxes", "value"),
         Input("model-checkboxes", "value"),
         Input("date-picker", "start_date"),
-        Input("date-picker", "end_date")
+        Input("date-picker", "end_date"),
+        Input('flaws-by-cause', 'clickData'),
+        Input('flaws-by-color', 'clickData'),
+        Input('flaws-by-type', 'clickData'),
+        Input('clean-filter-btn', 'n_clicks')
     ]
 )
-def update_plots(selected_colors, selected_models, start_date, end_date):
+def update_plots(selected_colors, selected_models, start_date, end_date, click_cause, click_color, click_type, clean_filter):
     filtered_df = data
-
-    if selected_colors:
+    if selected_colors and clean_filter == 0:
         filtered_df = filtered_df[filtered_df['color'].isin(selected_colors)]
 
-    if selected_models:
+    if selected_models and clean_filter == 0:
         filtered_df = filtered_df[filtered_df['model'].isin(selected_models)]
 
-    if start_date and end_date:
+    if start_date and end_date and clean_filter == 0:
         filtered_df = filtered_df[
             (filtered_df['arrived_at'] >= start_date) & (filtered_df['arrived_at'] <= end_date)
         ]
+    
+    if click_cause and clean_filter == 0:
+        print(click_cause)
+        label = [click_cause['points'][0]['label']]
+        filtered_df = filtered_df[filtered_df['cause'].isin(label)]
+
+    if click_color and clean_filter == 0:
+        label = [click_color['points'][0]['label']]
+        filtered_df = filtered_df[filtered_df['color'].isin(label)]
+    
+    if click_type and clean_filter == 0:
+        label = [click_type['points'][0]['label']]
+        filtered_df = filtered_df[filtered_df['flaw_type'].isin(label)]
+    
+    n_clicks = 0
 
     # Plot: Flaws by color (horizontal bar chart)
     flaws_by_color = px.bar(
@@ -195,11 +222,11 @@ def update_plots(selected_colors, selected_models, start_date, end_date):
         y='flaw_type',
         orientation='h',
         title='Flaws by Type'
-    )
+    ).update_yaxes(autorange='reversed')
 
     diagram_chart = create_flaw_diagram(filtered_df, 'lala')
 
-    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
+    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, n_clicks
 
 if __name__ == "__main__":
     app.run_server(debug=True)
