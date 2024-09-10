@@ -94,6 +94,35 @@ def find_polygon(x, y):
             return shape['label']
     return
 
+def generate_plots(data):
+    flaws_by_color = px.bar(
+        data.groupby('color').size().reset_index(name='flaws'),
+        x='flaws',
+        y='color',
+        orientation='h',
+        title='Flaws by Color'
+    )
+
+    flaws_by_cause = px.bar(
+        data.groupby('cause').size().reset_index(name='flaws'),
+        x='flaws',
+        y='cause',
+        orientation='h',
+        title='Flaws by Cause'
+    )
+
+    flaws_by_type = px.bar(
+        data.groupby('flaw_type').size().reset_index(name='flaws'),
+        x='flaws',
+        y='flaw_type',
+        orientation='h',
+        title='Flaws by Type'
+    ).update_yaxes(autorange='reversed')
+
+    diagram_chart = create_flaw_diagram(data, 'lala')
+    
+    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
+
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 app.layout = dbc.Container([
@@ -180,34 +209,7 @@ app.layout = dbc.Container([
     prevent_initial_call=False
 )
 def init_dash(click):
-    flaws_by_color = px.bar(
-        data.groupby('color').size().reset_index(name='flaws'),
-        x='flaws',
-        y='color',
-        orientation='h',
-        title='Flaws by Color'
-    )
-
-    # Plot: Flaws by cause (horizontal bar chart)
-    flaws_by_cause = px.bar(
-        data.groupby('cause').size().reset_index(name='flaws'),
-        x='flaws',
-        y='cause',
-        orientation='h',
-        title='Flaws by Cause'
-    )
-
-    # Plot: Amount of flaws by flaw type (horizontal bar chart)
-    flaws_by_type = px.bar(
-        data.groupby('flaw_type').size().reset_index(name='flaws'),
-        x='flaws',
-        y='flaw_type',
-        orientation='h',
-        title='Flaws by Type'
-    ).update_yaxes(autorange='reversed')
-
-    diagram_chart = create_flaw_diagram(data, 'lala')
-
+    flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart = generate_plots(data)
     return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
 
 @app.callback(
@@ -266,34 +268,7 @@ def update_plots(selected_colors, selected_models, start_date, end_date, click_c
     
     n_clicks = 0
 
-    # Plot: Flaws by color (horizontal bar chart)
-    flaws_by_color = px.bar(
-        filtered_df.groupby('color').size().reset_index(name='flaws'),
-        x='flaws',
-        y='color',
-        orientation='h',
-        title='Flaws by Color'
-    )
-
-    # Plot: Flaws by cause (horizontal bar chart)
-    flaws_by_cause = px.bar(
-        filtered_df.groupby('cause').size().reset_index(name='flaws'),
-        x='flaws',
-        y='cause',
-        orientation='h',
-        title='Flaws by Cause'
-    )
-
-    # Plot: Amount of flaws by flaw type (horizontal bar chart)
-    flaws_by_type = px.bar(
-        filtered_df.groupby('flaw_type').size().reset_index(name='flaws'),
-        x='flaws',
-        y='flaw_type',
-        orientation='h',
-        title='Flaws by Type'
-    ).update_yaxes(autorange='reversed')
-
-    diagram_chart = create_flaw_diagram(filtered_df, 'lala')
+    flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart = generate_plots(filtered_df)
 
     return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, n_clicks
 
