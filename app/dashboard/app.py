@@ -15,7 +15,7 @@ from shapely.geometry.polygon import Polygon
 car_list = pd.read_csv('./data/car_list.csv')
 detected_flaws = pd.read_csv('./data/detected_flaws.csv', index_col='index')
 flaw_cause = pd.read_csv('./data/flaw_cause.csv')
-annotation_path = '../data_visualization/crop_diagram_data.json'
+annotation_path = './data/crop_diagram_data.json'
 with open(annotation_path, 'r') as f:
     annotations = json.load(f)
 
@@ -27,7 +27,7 @@ complete_df['arrived_at'] = pd.to_datetime(complete_df['arrived_at'], dayfirst=T
 data = complete_df.sort_values(by='arrived_at')
 
 def create_flaw_diagram(filtered_df, filename):
-    img_path = '../data_visualization/crop_diagram_data.png'
+    img_path = './assets/crop_diagram_data.png'
     img = Image.open(img_path)
 
     draw = ImageDraw.Draw(img, 'RGBA')
