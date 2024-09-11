@@ -123,13 +123,14 @@ def generate_plots(data):
     
     return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
 
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+
+app = Dash(external_stylesheets=[dbc.themes.COSMO], suppress_callback_exceptions=True)
 
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dbc.Row([
-                html.H1('Flaws Dashboard')
+                html.H1('Flaws Dashboard', className='text-center fs-2 text-white')
             ]),
             dbc.Row([
                 dbc.DropdownMenu(
@@ -142,10 +143,11 @@ app.layout = dbc.Container([
                             ],
                             value=[],
                             id="color-checkboxes",
-                            inline=True
+                            inline=True,
+                            className='px-2'
                         )
                     ],
-                    toggle_style={"width": "100%"}
+                    color='secondary'
                 ),
             ], className='pt-4'),
             dbc.Row([
@@ -159,10 +161,11 @@ app.layout = dbc.Container([
                             ],
                             value=[],
                             id="model-checkboxes",
-                            inline=True
-                        )
+                            inline=True,
+                            className='px-2'
+                        ),
                     ],
-                    toggle_style={"width": "100%"}
+                    color='secondary'
                 ),
             ], className='pt-4'),
             dbc.Row([
@@ -170,15 +173,16 @@ app.layout = dbc.Container([
                     id='date-picker',
                     start_date=data['arrived_at'].min(),
                     end_date=data['arrived_at'].max(),
-                    display_format='YYYY-MM-DD'
+                    display_format='YYYY-MM-DD',
+                    className='bg-primary w-100 px-0 date-picker-container'
                 ),
-            ], className='pt-4'),
+            ], className='pt-4' ),
             dbc.Row([
                 dbc.Button(
-                    'Clean Filters', id='clean-filter-btn', n_clicks=0
+                    'Clean Filters', id='clean-filter-btn', n_clicks=0, className='btn btn-danger mt-auto'
                 )
-            ], className='pt-4')
-        ], width=2, className='pt-4'),
+            ], className='pb-5 col align-self-end')
+        ], width=2, className='pt-4 bg-primary px-0 d-flex flex-column'),
         dbc.Col([
             dcc.Graph(id='flaws-by-cause'),
             dcc.Graph(id='flaws-by-color'),
@@ -194,7 +198,7 @@ app.layout = dbc.Container([
         max_intervals=0,
         interval=1
     )
-], className='mx-0 my-0', fluid=True)
+], className='mx-0 my-0 px-0 py-0', fluid=True)
 
 @app.callback(
     [   
@@ -247,7 +251,6 @@ def update_plots(selected_colors, selected_models, start_date, end_date, click_c
         ]
     
     if click_cause and clean_filter == 0:
-        print(click_cause)
         label = [click_cause['points'][0]['label']]
         filtered_df = filtered_df[filtered_df['cause'].isin(label)]
 

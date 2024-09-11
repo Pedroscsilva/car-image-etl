@@ -1,0 +1,19 @@
+.row {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.dropdown {
+    padding-left: 0px;
+    padding-right: 0px;
+    width: 100%;
+}
+
+.dropdown-toggle {
+    width: 100%;
+}
+
+.DateRangePickerInput_arrow_svg {
+    margin-left: -2px;
+}
