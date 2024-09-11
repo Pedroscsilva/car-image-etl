@@ -37,13 +37,13 @@ def create_flaw_diagram(filtered_df, filename):
     def get_color(flaw_count):
         color_ratio = 255 / max_flaws
         color_intensity = int(min(flaw_count * color_ratio, 255))
-        return (99, 110, 250, color_intensity)
+        return (55, 90, 127, color_intensity)
 
     def get_centroid(polygon):
         x_coords = [p[0] for p in polygon]
         y_coords = [p[1] for p in polygon]
         centroid_x = sum(x_coords) / len(polygon)
-        centroid_y = sum(y_coords) / len(polygon)
+        centroid_y = sum(y_coords) / len(polygon) - 10
         return (centroid_x, centroid_y)
 
     font = ImageFont.load_default(size=20)
@@ -55,7 +55,7 @@ def create_flaw_diagram(filtered_df, filename):
             color = get_color(flaw_data[part_name])
             draw.polygon(polygon, fill=color)
             centroid = get_centroid(polygon)
-            draw.text(centroid, str(flaw_data[part_name]), fill='black', font=font)
+            draw.text(centroid, str(flaw_data[part_name]), fill='white', font=font)
 
     img_array = np.array(img)
     fig = px.imshow(img_array, title='Amount of Flaws per Car Part')
@@ -76,8 +76,9 @@ def create_flaw_diagram(filtered_df, filename):
             zeroline=False,
             showticklabels=False,
         ),
-        plot_bgcolor='white',
-        paper_bgcolor='white',
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
+        title_font=dict(color='white'), # White title font
     )
 
     return dcc.Graph(
@@ -100,7 +101,22 @@ def generate_plots(data):
         x='flaws',
         y='color',
         orientation='h',
-        title='Flaws by Color'
+        title='Flaws by Color',
+        text_auto=True,
+        color_discrete_sequence=['#375A7F']
+    ).update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
+        font=dict(color='white'),       # White font color
+        title_font=dict(color='white'), # White title font
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
+    ).update_traces(
+        marker=dict(
+            line=dict(
+                color='black',
+                width=1
+            )
+        )
     )
 
     flaws_by_cause = px.bar(
@@ -108,7 +124,22 @@ def generate_plots(data):
         x='flaws',
         y='cause',
         orientation='h',
-        title='Flaws by Cause'
+        title='Flaws by Cause',
+        text_auto=True,
+        color_discrete_sequence=['#375A7F']
+    ).update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
+        font=dict(color='white'),       # White font color
+        title_font=dict(color='white'), # White title font
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
+    ).update_traces(
+        marker=dict(
+            line=dict(
+                color='black',
+                width=1
+            )
+        )
     )
 
     flaws_by_type = px.bar(
@@ -116,21 +147,37 @@ def generate_plots(data):
         x='flaws',
         y='flaw_type',
         orientation='h',
-        title='Flaws by Type'
-    ).update_yaxes(autorange='reversed')
+        title='Flaws by Type',
+        text_auto=True,
+        color_discrete_sequence=['#375A7F'],
+    ).update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
+        font=dict(color='white'),       # White font color
+        title_font=dict(color='white'), # White title font
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None), 
+        yaxis=dict(autorange='reversed'),
+    ).update_traces(
+        marker=dict(
+            line=dict(
+                color='black',
+                width=1
+            )
+        )
+    )
 
     diagram_chart = create_flaw_diagram(data, 'lala')
     
     return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
 
 
-app = Dash(external_stylesheets=[dbc.themes.COSMO], suppress_callback_exceptions=True)
+app = Dash(external_stylesheets=[dbc.themes.DARKLY], suppress_callback_exceptions=True)
 
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dbc.Row([
-                html.H1('Flaws Dashboard', className='text-center fs-2 text-white')
+                html.H1('Flaws Dashboard', className='text-center fs-3 text-white')
             ]),
             dbc.Row([
                 dbc.DropdownMenu(
