@@ -62,7 +62,8 @@ def create_flaw_diagram(filtered_df, filename):
 
     fig.update_layout(
         title='Amount of Flaws per Car Part',
-        title_y=0.91,
+        title_x=0.5,
+        title_y=0.97,
         margin=dict(l=0, r=0, t=50, b=0),
         xaxis=dict(
             showgrid=False,
@@ -101,7 +102,6 @@ def generate_plots(data):
         x='flaws',
         y='color',
         orientation='h',
-        title='Flaws by Color',
         text_auto=True,
         color_discrete_sequence=['#375A7F']
     ).update_layout(
@@ -110,6 +110,8 @@ def generate_plots(data):
         font=dict(color='white'),       # White font color
         title_font=dict(color='white'), # White title font
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
+        title='Flaws by Color',
+        title_x=0.5,
     ).update_traces(
         marker=dict(
             line=dict(
@@ -124,10 +126,11 @@ def generate_plots(data):
         x='flaws',
         y='cause',
         orientation='h',
-        title='Flaws by Cause',
         text_auto=True,
         color_discrete_sequence=['#375A7F']
     ).update_layout(
+        title='Flaws by Cause',
+        title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
         font=dict(color='white'),       # White font color
@@ -147,10 +150,11 @@ def generate_plots(data):
         x='flaws',
         y='flaw_type',
         orientation='h',
-        title='Flaws by Type',
         text_auto=True,
         color_discrete_sequence=['#375A7F'],
     ).update_layout(
+        title='Flaws by Type',
+        title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
         font=dict(color='white'),       # White font color
