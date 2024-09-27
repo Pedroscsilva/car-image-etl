@@ -180,6 +180,7 @@ def generate_plots(data):
         font=dict(color=primary_text_color),       # White font color
         title_font=dict(color=primary_text_color, size=24), # White title font
         xaxis=dict(showgrid=False, title=None),
+        height=490
     )
 
     diagram_chart = create_flaw_diagram(data, 'lala')
@@ -243,7 +244,8 @@ app.layout = dbc.Container([
                                 start_date=data['arrived_at'].min(),
                                 end_date=data['arrived_at'].max(),
                                 display_format='YYYY-MM-DD',
-                                className='bg-light w-100 px-0 date-picker-container'
+                                className='bg-light w-100 px-0 date-picker-container',
+                                style={'width': '402.867'}
                             ),
                         ], className='pt-4' ),
                         dbc.Row([
@@ -256,10 +258,10 @@ app.layout = dbc.Container([
             ], width=3, className='pt-4 bg-light px-0 d-flex flex-column'),
             dbc.Col([
                 html.Div(id='flaw-diagram'),
-            ], width=5, className='py-4'),
+            ], width=5, className='pt-4'),
             dbc.Col([
                 dcc.Graph(id='flaws-by-date')
-            ], width=4, className='py-4')
+            ], width=4, className='pt-4')
         ], className='px-0 py-0'),
         dbc.Row([
             dbc.Col([   
