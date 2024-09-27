@@ -25,6 +25,8 @@ complete_df = explained_detected_flaws.merge(car_list, how='left', on='car_id')
 complete_df['arrived_at'] = pd.to_datetime(complete_df['arrived_at'], dayfirst=True)
 
 data = complete_df.sort_values(by='arrived_at')
+primary_text_color = '#000000'
+secondary_text_color = 'rgba(0, 0, 0, 0.65)'
 
 def create_flaw_diagram(filtered_df, filename):
     img_path = './assets/crop_diagram_data.png'
@@ -62,7 +64,6 @@ def create_flaw_diagram(filtered_df, filename):
 
     fig.update_layout(
         title='Amount of Flaws per Car Part',
-        title_x=0.5,
         title_y=0.97,
         margin=dict(l=0, r=0, t=50, b=0),
         xaxis=dict(
@@ -79,7 +80,7 @@ def create_flaw_diagram(filtered_df, filename):
         ),
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
-        title_font=dict(color='white'), # White title font
+        title_font=dict(color=primary_text_color), # White title font
     )
 
     return dcc.Graph(
@@ -107,11 +108,10 @@ def generate_plots(data):
     ).update_layout(
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
-        font=dict(color='white'),       # White font color
-        title_font=dict(color='white'), # White title font
+        font=dict(color=primary_text_color),       # White font color
+        title_font=dict(color=primary_text_color), # White title font
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
         title='Flaws by Color',
-        title_x=0.5,
     ).update_traces(
         marker=dict(
             line=dict(
@@ -130,11 +130,10 @@ def generate_plots(data):
         color_discrete_sequence=['#375A7F']
     ).update_layout(
         title='Flaws by Cause',
-        title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
-        font=dict(color='white'),       # White font color
-        title_font=dict(color='white'), # White title font
+        font=dict(color=primary_text_color),       # White font color
+        title_font=dict(color=primary_text_color), # White title font
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
     ).update_traces(
         marker=dict(
@@ -154,11 +153,10 @@ def generate_plots(data):
         color_discrete_sequence=['#375A7F'],
     ).update_layout(
         title='Flaws by Type',
-        title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         plot_bgcolor='rgba(0,0,0,0)',   # Transparent plot background
-        font=dict(color='white'),       # White font color
-        title_font=dict(color='white'), # White title font
+        font=dict(color=primary_text_color),       # White font color
+        title_font=dict(color=primary_text_color), # White title font
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None), 
         yaxis=dict(autorange='reversed'),
     ).update_traces(
@@ -175,73 +173,81 @@ def generate_plots(data):
     return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart
 
 
-app = Dash(external_stylesheets=[dbc.themes.DARKLY], suppress_callback_exceptions=True)
+app = Dash(external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True)
 
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([
-            dbc.Row([
-                html.H1('Flaws Dashboard', className='text-center fs-3 text-white')
-            ]),
-            dbc.Row([
-                dbc.DropdownMenu(
-                    label="Color Filters",
-                    children=[
-                        dbc.Checklist(
-                            options=[
-                                {"label": color, "value": color}
-                                for color in data['color'].unique()
-                            ],
-                            value=[],
-                            id="color-checkboxes",
-                            inline=True,
-                            className='px-2'
-                        )
-                    ],
-                    color='secondary'
-                ),
-            ], className='pt-4'),
-            dbc.Row([
-                dbc.DropdownMenu(
-                    label="Model Filters",
-                    children=[
-                        dbc.Checklist(
-                            options=[
-                                {"label": model, "value": model}
-                                for model in data['model'].unique()
-                            ],
-                            value=[],
-                            id="model-checkboxes",
-                            inline=True,
-                            className='px-2'
-                        ),
-                    ],
-                    color='secondary'
-                ),
-            ], className='pt-4'),
-            dbc.Row([
-                dcc.DatePickerRange(
-                    id='date-picker',
-                    start_date=data['arrived_at'].min(),
-                    end_date=data['arrived_at'].max(),
-                    display_format='YYYY-MM-DD',
-                    className='bg-primary w-100 px-0 date-picker-container'
-                ),
-            ], className='pt-4' ),
-            dbc.Row([
-                dbc.Button(
-                    'Clean Filters', id='clean-filter-btn', n_clicks=0, className='btn btn-danger mt-auto'
-                )
-            ], className='pb-5 col align-self-end')
-        ], width=2, className='pt-4 bg-primary px-0 d-flex flex-column'),
-        dbc.Col([
-            dcc.Graph(id='flaws-by-cause'),
-            dcc.Graph(id='flaws-by-color'),
-        ], width=5),
-        dbc.Col([
-            html.Div(id='flaw-diagram'),
-            dcc.Graph(id='flaws-by-type'),
-        ], width=5),
+        dbc.Row([
+            dbc.Col([
+                dbc.Row([
+                    html.H1('Flaws Dashboard', className='text-center fs-3 text-white')
+                ]),
+                dbc.Row([
+                    dbc.DropdownMenu(
+                        label="Color Filters",
+                        children=[
+                            dbc.Checklist(
+                                options=[
+                                    {"label": color, "value": color}
+                                    for color in data['color'].unique()
+                                ],
+                                value=[],
+                                id="color-checkboxes",
+                                inline=True,
+                                className='px-2'
+                            )
+                        ],
+                        color='secondary'
+                    ),
+                ], className='pt-4'),
+                dbc.Row([
+                    dbc.DropdownMenu(
+                        label="Model Filters",
+                        children=[
+                            dbc.Checklist(
+                                options=[
+                                    {"label": model, "value": model}
+                                    for model in data['model'].unique()
+                                ],
+                                value=[],
+                                id="model-checkboxes",
+                                inline=True,
+                                className='px-2'
+                            ),
+                        ],
+                        color='secondary'
+                    ),
+                ], className='pt-4'),
+                dbc.Row([
+                    dcc.DatePickerRange(
+                        id='date-picker',
+                        start_date=data['arrived_at'].min(),
+                        end_date=data['arrived_at'].max(),
+                        display_format='YYYY-MM-DD',
+                        className='bg-light w-100 px-0 date-picker-container'
+                    ),
+                ], className='pt-4' ),
+                dbc.Row([
+                    dbc.Button(
+                        'Clean Filters', id='clean-filter-btn', n_clicks=0, className='btn btn-danger mt-auto'
+                    )
+                ], className='pb-5 col align-self-end')
+            ], width=6, className='pt-4 bg-light px-0 d-flex flex-column'),
+            dbc.Col([
+                html.Div(id='flaw-diagram'),
+            ], width=6)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(id='flaws-by-cause'),
+            ], width=4),
+            dbc.Col([
+                dcc.Graph(id='flaws-by-color'),
+            ], width=4),
+            dbc.Col([
+                dcc.Graph(id='flaws-by-type'),
+            ], width=4)
+        ]),
     ]),
     dcc.Interval(
         id='load_interval',
@@ -249,7 +255,7 @@ app.layout = dbc.Container([
         max_intervals=0,
         interval=1
     )
-], className='mx-0 my-0 px-0 py-0', fluid=True)
+], className='mx-0 my-0 px-0 py-0 bg-light', fluid=True)
 
 @app.callback(
     [   
