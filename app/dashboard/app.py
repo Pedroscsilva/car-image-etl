@@ -39,8 +39,6 @@ def create_flaw_diagram(filtered_df, filename):
     flaw_data = filtered_df.groupby('roi')['flaw_type'].count()
     max_flaws = max(flaw_data) if not flaw_data.empty else 1
 
-    print(flaw_data)
-
     def get_color(flaw_count):
         color_ratio = 255 / max_flaws
         color_intensity = int(min(flaw_count * color_ratio, 255))
@@ -328,18 +326,19 @@ def init_dash(click):
         Input('flaws-by-color', 'clickData'),
         Input('flaws-by-type', 'clickData'),
         Input('inner_diagram', 'clickData'),
-        Input('flaws-by-date', 'clickData'),
-        Input('clean-filter-btn', 'n_clicks')
+        Input('clean-filter-btn', 'n_clicks'),
+        Input('flaws-by-date', 'clickData')
     ],
-    [State('clean-filter-btn', 'n_clicks')],
     prevent_initial_call=True
 )
-def update_plots(selected_colors, selected_models, start_date, end_date, click_cause, click_color, click_type, click_diagram, click_flaw_date, clean_filter, clean_filter_state):
+def update_plots(selected_colors, selected_models, start_date, end_date, click_cause, click_color, click_type, click_diagram, clean_filter, click_flaw_date):
     filtered_df = data.copy()
-    
-    if clean_filter and clean_filter != clean_filter_state:
-        n_clicks = 0
-        return generate_plots(data) + (n_clicks,) + (None, None, None, None, None)
+
+    n_clicks = 0
+    if clean_filter:
+        flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, flaws_by_time = generate_plots(filtered_df)
+
+        return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, n_clicks, flaws_by_time, None, None, None, None, None
 
     if selected_colors:
         filtered_df = filtered_df[filtered_df['color'].isin(selected_colors)]
@@ -363,12 +362,10 @@ def update_plots(selected_colors, selected_models, start_date, end_date, click_c
         if label:
             filtered_df = filtered_df[filtered_df['roi'].isin([label])]
     
-    n_clicks = 0
 
     flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, flaws_by_time = generate_plots(filtered_df)
 
-    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, n_clicks, flaws_by_time, None, None, None, None, None
-
+    return flaws_by_color, flaws_by_cause, flaws_by_type, diagram_chart, n_clicks, flaws_by_time, click_cause, click_color, click_type, click_diagram, click_flaw_date
 
 if __name__ == "__main__":
     app.run_server(debug=True)
